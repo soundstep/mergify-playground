@@ -104,7 +104,7 @@ pnpm install
 
 echo -e "${CYAN}Applying release plan${NC}"
 
-deno run --unstable --allow-read --allow-run \
+deno run --unstable --allow-read --allow-run --allow-write \
     "https://$GITHUB_TOKEN@raw.githubusercontent.com/ITV/fe-core-cli/pnpm-release/mod.pnpm-release.ts" \
     apply $DRY_RUN_ARG
 
