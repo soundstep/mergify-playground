@@ -16,7 +16,7 @@ jobs:
     if: |
       contains(github.event.pull_request.labels.*.name, 'action-merge') &&
       github.event.pull_request.state == 'open' &&
-      (github.actor == 'soundstep' || github.actor == 'mergify')
+      github.actor == 'soundstep'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     name: Apply Release Plan

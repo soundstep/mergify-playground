@@ -8,5 +8,3 @@ pull_request_rules:
           - approved
         add:
           - action-merge
-      merge:
-        method: merge
