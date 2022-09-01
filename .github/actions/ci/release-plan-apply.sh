@@ -117,13 +117,20 @@ pnpm install
 
 echo -e "${CYAN}Pushing changes to git remote${NC}"
 
+git status
+
 git status | grep "package\.json" | awk {"print \$2"} | xargs git add
 # git add .release-plan
 git add pnpm-lock.yaml
-git commit -m "Apply release plan."
 
-if [[ -z "${DRY_RUN}" ]]; then
-    git push origin "$CURRENT_BRANCH"
+if [[ $(git diff --name-only --cached) == "" ]]; then
+    echo "No changes staged, nothing to commit."
+else
+    echo "Changes staged, creating commit and pushing."
+    git commit -m "Apply release plan."
+    if [[ -z "${DRY_RUN}" ]]; then
+        git push origin "$CURRENT_BRANCH"
+    fi
 fi
 
 echo -e "${GREEN}All operations successful${NC}"
