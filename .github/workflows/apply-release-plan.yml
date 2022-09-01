@@ -26,24 +26,9 @@ jobs:
           echo "actor: ${{ github.actor }}"
           echo "pr state: ${{ github.event.pull_request.state }}"
           echo "labels: ${{ github.event.pull_request.labels }}"
-  set-pending-check:
-    if: always()
-    needs: [print-info]
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    name: Set pending check
-    steps:
-    - uses: LouisBrunner/checks-action@v1.1.1
-      if: always()
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        name: Test XYZ
-        conclusion: ${{ job.status }}
-        output: |
-          {"summary":"something"}
   apply-release-plan:
     if: always()
-    needs: [set-pending-check]
+    needs: [print-info]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     name: Apply Release Plan
@@ -87,6 +72,23 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: ${{ steps.cache-workspace.outputs.pnpm-store-key }}
+  set-pending-check:
+    if: always()
+    needs: [apply-release-plan]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    name: Set pending check
+    steps:
+    - uses: LouisBrunner/checks-action@v1.1.1
+      if: always()
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: CI Status
+        conclusion: ${{ job.status }}
+        status: in_progress
+        output: |
+          {"summary":"something"}
+
   # merge-branch:
   #   needs: apply-release-plan
   #   runs-on: ubuntu-latest
