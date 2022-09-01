@@ -1,0 +1,19 @@
+{
+  "name": "mergify-playground",
+  "description": "Playground for mergify.",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soundstep/mergify-playground.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/soundstep/mergify-playground/issues"
+  },
+  "homepage": "https://github.com/soundstep/mergify-playground#readme"
+}
