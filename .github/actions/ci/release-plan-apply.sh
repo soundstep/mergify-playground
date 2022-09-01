@@ -118,7 +118,7 @@ pnpm install
 echo -e "${CYAN}Pushing changes to git remote${NC}"
 
 git status | grep "package\.json" | awk {"print \$2"} | xargs git add
-git add .release-plan
+# git add .release-plan
 git add pnpm-lock.yaml
 git commit -m "Apply release plan."
 

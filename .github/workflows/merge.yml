@@ -37,11 +37,11 @@ jobs:
           node-version: 14.x
       - uses: pnpm/action-setup@35ab4267a1a21c8e8cb1c087cf1642e891ff57bd
         with:
-          version: 6.22.2
+          version: 7.9.5
       - name: Setup git
         run: |
           git fetch --no-tags --prune --depth=5 origin main:main
-          git config --global user.email "null@soundstep.com"
+          git config --global user.email "bot@soundstep.com"
           git config --global user.name "soundstep-bot"
       - name: Cache workspace
         id: cache-workspace
