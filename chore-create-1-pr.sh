@@ -62,7 +62,7 @@ function create_pr {
     git commit -m "Changes added"
     git push origin "$PR_NAME"
     # create release plan
-    deno run --unstable --allow-read --allow-run \
+    deno run --unstable --allow-read --allow-run --allow-write \
         "https://$GITHUB_TOKEN@raw.githubusercontent.com/ITV/fe-core-cli/pnpm-release/mod.pnpm-release.ts" \
         create --output --no-git-checks
     git add .release-plan
