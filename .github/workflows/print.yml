@@ -12,6 +12,9 @@ concurrency:
 
 jobs:
   print:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+      github.event.pull_request.state == 'open'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     name: Print information
