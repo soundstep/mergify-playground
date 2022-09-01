@@ -12,11 +12,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  print-info:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    name: Print info
+    steps:
+    - name: Print info
+      run: |
+        echo "actor: ${{ github.actor }}"
+        echo "pr state: ${{ github.event.pull_request.state }}"
+        echo "labels: ${{ github.event.pull_request.labels }}"
   set-pending-check:
     if: |
-      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
-      github.event.pull_request.state == 'open' &&
-      (github.actor == 'soundstep' || github.actor == 'mergify[bot]')
+      ${{
+        always() &&
+        contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+        github.event.pull_request.state == 'open' &&
+        github.actor == 'mergify[bot]'
+      }}
+    needs: [print-info]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     name: Set pending check
