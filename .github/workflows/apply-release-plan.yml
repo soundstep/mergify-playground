@@ -17,11 +17,11 @@ jobs:
     timeout-minutes: 3
     name: Print info
     steps:
-    - name: Print info
-      run: |
-        echo "actor: ${{ github.actor }}"
-        echo "pr state: ${{ github.event.pull_request.state }}"
-        echo "labels: ${{ github.event.pull_request.labels }}"
+      - name: Print info
+        run: |
+          echo "actor: ${{ github.actor }}"
+          echo "pr state: ${{ github.event.pull_request.state }}"
+          echo "labels: ${{ github.event.pull_request.labels }}"
   set-pending-check:
     if: |
       ${{
@@ -35,12 +35,12 @@ jobs:
     timeout-minutes: 3
     name: Set pending check
     steps:
-    - uses: LouisBrunner/checks-action@v1.1.1
-      with:
-        token: ${{ secrets.ACTION_TOKEN }}
-        name: CI Status
-        status: in_progress
-        action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - uses: LouisBrunner/checks-action@v1.1.1
+        with:
+          token: ${{ secrets.ACTION_TOKEN }}
+          name: CI Status
+          status: in_progress
+          action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   apply-release-plan:
     if: always()
     needs: [set-pending-check]
