@@ -1,4 +1,4 @@
-name: Release Plan Merge
+name: Apply Release Plan
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -8,7 +8,7 @@ on: # yamllint disable-line rule:truthy
     types: [labeled]
 
 concurrency:
-  group: 'release-plan-merge'
+  group: 'apply-release-plan'
   cancel-in-progress: false
 
 jobs:
@@ -60,19 +60,19 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: ${{ steps.cache-workspace.outputs.pnpm-store-key }}
-  merge-branch:
-    needs: apply-release-plan
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    name: Merge Branch
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-      - name: Merge Pull Request
-        uses: juliangruber/merge-pull-request-action@v1
-        with:
-          github-token: ${{ secrets.ACTION_TOKEN }}
-          number: ${{ github.event.number }}
-          method: squash
+  # merge-branch:
+  #   needs: apply-release-plan
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   name: Merge Branch
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         ref: ${{ github.head_ref }}
+  #         fetch-depth: 0
+  #     - name: Merge Pull Request
+  #       uses: juliangruber/merge-pull-request-action@v1
+  #       with:
+  #         github-token: ${{ secrets.ACTION_TOKEN }}
+  #         number: ${{ github.event.number }}
+  #         method: squash
