@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "lodash.mergewith": "^4.6.2"
+    "lodash.mergewith": "^4.6.2",
+    "fe-package1": "^1.0.0",
+    "fe-package2": "^1.0.0"
   }
 }

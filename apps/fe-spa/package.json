@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.27.2"
+    "axios": "^0.27.2",
+    "fe-package1": "^1.0.0",
+    "fe-package3": "^1.0.0"
   }
 }
