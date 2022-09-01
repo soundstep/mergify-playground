@@ -27,7 +27,10 @@ jobs:
           echo "pr state: ${{ github.event.pull_request.state }}"
           echo "labels: ${{ github.event.pull_request.labels }}"
   apply-release-plan:
-    if: always()
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'mergify[bot]'
     needs: [print-info]
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -73,7 +76,10 @@ jobs:
           path: ~/.pnpm-store
           key: ${{ steps.cache-workspace.outputs.pnpm-store-key }}
   set-pending-check:
-    if: always()
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'mergify[bot]'
     needs: [apply-release-plan]
     runs-on: ubuntu-latest
     timeout-minutes: 3
@@ -84,7 +90,6 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: CI Status
-        conclusion: ${{ job.status }}
         status: in_progress
         output: |
           {"summary":"something"}
