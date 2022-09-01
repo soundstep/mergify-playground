@@ -13,6 +13,10 @@ concurrency:
 
 jobs:
   print-info:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'mergify[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     name: Print info
@@ -23,24 +27,20 @@ jobs:
           echo "pr state: ${{ github.event.pull_request.state }}"
           echo "labels: ${{ github.event.pull_request.labels }}"
   set-pending-check:
-    if: |
-      ${{
-        always() &&
-        contains(github.event.pull_request.labels.*.name, 'action-merge') &&
-        github.event.pull_request.state == 'open' &&
-        github.actor == 'mergify[bot]'
-      }}
+    if: always()
     needs: [print-info]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     name: Set pending check
     steps:
-      - uses: LouisBrunner/checks-action@v1.1.1
-        with:
-          token: ${{ secrets.ACTION_TOKEN }}
-          name: CI Status
-          status: in_progress
-          action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    - uses: LouisBrunner/checks-action@v1.1.1
+      if: always()
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: Test XYZ
+        conclusion: ${{ job.status }}
+        output: |
+          {"summary":${{ steps.test.outputs.summary }}}
   apply-release-plan:
     if: always()
     needs: [set-pending-check]
