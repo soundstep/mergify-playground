@@ -62,10 +62,12 @@ function create_pr {
     git commit -m "Changes added"
     git push origin "$PR_NAME"
     # create release plan
-    # pnpm release-plan -- create --output --no-git-checks
-    # git add .release-plan
-    # git commit -m "Release plan created"
-    # git push origin "$PR_NAME"
+    deno run --unstable --allow-read --allow-run \
+        "https://$GITHUB_TOKEN@raw.githubusercontent.com/ITV/fe-core-cli/pnpm-release/mod.pnpm-release.ts" \
+        create --output --no-git-checks
+    git add .release-plan
+    git commit -m "Release plan created"
+    git push origin "$PR_NAME"
     # create pull request
     gh pr create --title "$PR_NAME" --body "Generated pull request"
     # back in initial branch

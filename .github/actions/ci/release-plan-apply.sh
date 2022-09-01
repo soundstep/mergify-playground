@@ -51,9 +51,9 @@ echo " --base-branch: $BASE_BRANCH"
 if [[ -z "${GITHUB_TOKEN}" ]]; then
     echo -e "${RED}Missing env var: GITHUB_TOKEN${NC}"
     exit 1
-# elif [[ ! -f "${RELEASE_PLAN}" ]]; then
-#     echo -e "${RED}Missing release plan file: $RELEASE_PLAN ${NC}"
-#     exit 1
+elif [[ ! -f "${RELEASE_PLAN}" ]]; then
+    echo -e "${RED}Missing release plan file: $RELEASE_PLAN ${NC}"
+    exit 1
 fi
 
 # run
@@ -104,11 +104,13 @@ pnpm install
 
 echo -e "${CYAN}Applying release plan${NC}"
 
-# pnpm release-plan -- apply $DRY_RUN_ARG
+deno run --unstable --allow-read --allow-run \
+    "https://$GITHUB_TOKEN@raw.githubusercontent.com/ITV/fe-core-cli/pnpm-release/mod.pnpm-release.ts" \
+    apply $DRY_RUN_ARG
 
 echo -e "${CYAN}Deleting release plan${NC}"
 
-# rm -f .release-plan
+rm -f .release-plan
 
 echo -e "${CYAN}Updating pnpm lock file${NC}"
 
@@ -120,7 +122,7 @@ echo -e "${CYAN}Pushing changes to git remote${NC}"
 git status
 
 git status | grep "package\.json" | awk {"print \$2"} | xargs git add
-# git add .release-plan
+git add .release-plan
 git add pnpm-lock.yaml
 
 if [[ $(git diff --name-only --cached) == "" ]]; then

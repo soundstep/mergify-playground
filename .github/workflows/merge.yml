@@ -21,6 +21,9 @@ jobs:
     timeout-minutes: 15
     name: Apply Release Plan
     steps:
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
       - name: Remove labels
         continue-on-error: true
         uses: actions-ecosystem/action-remove-labels@v1
