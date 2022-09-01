@@ -40,7 +40,7 @@ jobs:
         name: Test XYZ
         conclusion: ${{ job.status }}
         output: |
-          {"summary":${{ steps.test.outputs.summary }}}
+          {"summary":"something"}
   apply-release-plan:
     if: always()
     needs: [set-pending-check]
