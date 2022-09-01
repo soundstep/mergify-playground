@@ -12,6 +12,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  set-pending-check:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+      github.event.pull_request.state == 'open' &&
+      (github.actor == 'soundstep' || github.actor == 'mergify[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: Set pending check
+    steps:
+    - uses: LouisBrunner/checks-action@v1.1.1
+      with:
+        token: ${{ secrets.ACTION_TOKEN }}
+        name: CI Status
+        status: in_progress
+        action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   apply-release-plan:
     if: |
       contains(github.event.pull_request.labels.*.name, 'action-merge') &&
