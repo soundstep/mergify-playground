@@ -1,0 +1,75 @@
+name: Release Plan Merge
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    types: [labeled]
+
+concurrency:
+  group: 'release-plan-merge'
+  cancel-in-progress: false
+
+jobs:
+  apply-release-plan:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'soundstep'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: Apply Release Plan
+    steps:
+      - name: Remove labels
+        continue-on-error: true
+        uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          labels: |
+            action-merge
+          github_token: ${{ secrets.ACTION_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+      - uses: pnpm/action-setup@35ab4267a1a21c8e8cb1c087cf1642e891ff57bd
+        with:
+          version: 6.22.2
+      - name: Setup git
+        run: |
+          git fetch --no-tags --prune --depth=5 origin main:main
+          git config --global user.email "null@soundstep.com"
+          git config --global user.name "soundstep-bot"
+      - name: Cache workspace
+        id: cache-workspace
+        uses: ./.github/actions/ci/workspace-cache
+      - name: Apply release plan
+        run: |
+          ./.github/actions/ci/release-plan-apply.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}
+      - name: Save pnpm store to cache
+        if: steps.cache-workspace.outputs.pnpm-store-hit != 'true'
+        uses: martijnhols/actions-cache/save@b4759b598f97eb31dbd72627b610d83b85c87c97
+        with:
+          path: ~/.pnpm-store
+          key: ${{ steps.cache-workspace.outputs.pnpm-store-key }}
+  merge-branch:
+    needs: apply-release-plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: Merge Branch
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Merge Pull Request
+        uses: juliangruber/merge-pull-request-action@v1
+        with:
+          github-token: ${{ secrets.ACTION_TOKEN }}
+          number: ${{ github.event.number }}
+          method: squash

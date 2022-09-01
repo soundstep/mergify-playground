@@ -1,0 +1,70 @@
+name: CI Workspace cache
+description: Cache pnpm store and node modules
+inputs:
+  pnpm-store-cache-enabled:
+    required: false
+    description: "Enable or disable pnpm store caching"
+    default: "true"
+  pnpm-store-cache-name:
+    required: false
+    description: "The name of the cache for the pnpm store"
+    default: "pnpm-store-cache"
+  node-modules-cache-enabled:
+    required: false
+    description: "Enable or disable node modules caching"
+    default: "true"
+  node-modules-cache-name:
+    required: false
+    description: "The name of the cache for the node modules"
+    default: "node-modules-cache"
+outputs:
+  pnpm-store-hit:
+    description: "True if pnpm store cache hit"
+    value: ${{ steps.pnpm-store-cache.outputs.cache-hit }}
+  pnpm-store-key:
+    description: "The pnpm store cache key"
+    value: ${{ steps.pnpm-store-cache.outputs.primary-key }}
+  node-modules-hit:
+    description: "True if node modules cache hit"
+    value: ${{ steps.node-modules-cache.outputs.cache-hit }}
+  node-modules-key:
+    description: "The node modules cache key"
+    value: ${{ steps.node-modules-cache.outputs.primary-key }}
+runs:
+  using: "composite"
+  steps:
+    - name: Print inputs
+      shell: bash
+      run: |
+        echo "pnpm-store-cache-enabled: ${{ inputs.pnpm-store-cache-enabled }}"
+        echo "pnpm-store-cache-name: ${{ inputs.pnpm-store-cache-name }}"
+        echo "node-modules-cache-enabled: ${{ inputs.node-modules-cache-enabled }}"
+        echo "node-modules-cache-name: ${{ inputs.node-modules-cache-name }}"
+    - name: Restore pnpm store
+      id: pnpm-store-cache
+      uses: martijnhols/actions-cache/restore@b4759b598f97eb31dbd72627b610d83b85c87c97
+      if: inputs.pnpm-store-cache-enabled == 'true'
+      env:
+        pnpm-cache-name: ${{ inputs.pnpm-store-cache-name }}
+        pnpm-cache-version: "1"  # manually increase to create a new cache version
+        pnpm-cache-node-version: "14"
+      with:
+        path: ~/.pnpm-store
+        key: ${{ env.pnpm-cache-version }}-${{ env.pnpm-cache-node-version }}-${{ env.pnpm-cache-name }}-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ env.pnpm-cache-version }}-${{ env.pnpm-cache-node-version }}-${{ env.pnpm-cache-name }}-${{ runner.os }}-
+    - name: Restore node modules
+      id: node-modules-cache
+      if: inputs.node-modules-cache-enabled == 'true'
+      uses: martijnhols/actions-cache/restore@b4759b598f97eb31dbd72627b610d83b85c87c97
+      env:
+        node-modules-cache-name: ${{ inputs.node-modules-cache-name }}
+        node-modules-cache-version: "1"  # manually increase to create a new cache version
+        node-modules-cache-node-version: "14"
+      with:
+        path: |
+          ./pnpm-lock.yaml
+          ./node_modules
+        key: ${{ env.node-modules-cache-version }}-${{ env.node-modules-cache-node-version }}-${{ env.node-modules-cache-name }}-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ env.node-modules-cache-version }}-${{ env.node-modules-cache-node-version }}-${{ env.node-modules-cache-name }}-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
