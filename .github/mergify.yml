@@ -15,7 +15,7 @@ pull_request_rules:
   - name: Prepare pull request to be merge
     conditions:
       - base=main
-      - draft=false
+      - -draft
       - -merged
       - -closed
       - -check-pending=CI Status
@@ -31,7 +31,7 @@ pull_request_rules:
   - name: Automatic merge on approval
     conditions:
       - base=main
-      - draft=false
+      - -draft
       - -merged
       - -closed
       - check-pending=CI Status
@@ -55,7 +55,10 @@ pull_request_rules:
           check-run.
   - name: warn on conflicts
     conditions:
-      - ci-conflict
+      - conflict
+      - -draft
+      - -merged
+      - -closed
     actions:
       comment:
         message: "@{{author}} this pull request is now in conflict 😩"
@@ -64,7 +67,10 @@ pull_request_rules:
           - ci-conflict
   - name: remove conflict label if not needed
     conditions:
-      - -ci-conflict
+      - -conflict
+      - -draft
+      - -merged
+      - -closed
     actions:
       label:
         remove:
