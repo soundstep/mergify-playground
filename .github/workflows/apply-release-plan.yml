@@ -75,7 +75,7 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: ${{ steps.cache-workspace.outputs.pnpm-store-key }}
-  set-pending-check:
+  set-pending-status:
     if: |
       contains(github.event.pull_request.labels.*.name, 'action-merge') &&
       github.event.pull_request.state == 'open' &&
@@ -83,13 +83,13 @@ jobs:
     needs: [apply-release-plan]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    name: Set pending check
+    name: Set pending status
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - name: Set penging check
+      - name: Set penging status
         run: |
           CURRENT_SHA=$(git rev-parse HEAD)
           echo "CURRENT_SHA: $CURRENT_SHA"
@@ -102,20 +102,47 @@ jobs:
                 "description": "Running...",
                 "context": "CI Status"
             }'
-
-  # merge-branch:
-  #   needs: apply-release-plan
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 15
-  #   name: Merge Branch
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         ref: ${{ github.head_ref }}
-  #         fetch-depth: 0
-  #     - name: Merge Pull Request
-  #       uses: juliangruber/merge-pull-request-action@v1
-  #       with:
-  #         github-token: ${{ secrets.ACTION_TOKEN }}
-  #         number: ${{ github.event.number }}
-  #         method: squash
+  merge-branch:
+    needs: [set-pending-status]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: Merge Branch
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Merge Pull Request
+        uses: juliangruber/merge-pull-request-action@v1
+        with:
+          github-token: ${{ secrets.ACTION_TOKEN }}
+          number: ${{ github.event.number }}
+          method: squash
+  set-error-status:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'action-merge') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'mergify[bot]' &&
+      (needs.apply-release-plan.result == 'failure' || needs.merge-branch.result == 'failure')
+    needs: [apply-release-plan, merge-branch]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    name: Set error status
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Set error status
+        run: |
+          CURRENT_SHA=$(git rev-parse HEAD)
+          echo "CURRENT_SHA: $CURRENT_SHA"
+          curl --location --request POST "https://${{ secrets.ACTION_TOKEN }}@api.github.com/repos/${{ github.repository }}/statuses/$CURRENT_SHA" \
+            --header 'Accept: application/vnd.github.antiope-preview+json' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "state": "error",
+                "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Running...",
+                "context": "CI Status"
+            }'
