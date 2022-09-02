@@ -1,8 +1,3 @@
-queue_rules:
-  - name: prepare
-    conditions: []
-  - name: merge
-    conditions: []
 pull_request_rules:
   - name: Prepare pull request to be merge
     conditions:
@@ -14,8 +9,6 @@ pull_request_rules:
       - label!=do-not-merge
       - label=simulate-approvals # simulate
     actions:
-      queue:
-        name: prepare
       comment:
         message: Thank you for contributing! Your pull request is now being automatically merged.
       label:
@@ -30,8 +23,6 @@ pull_request_rules:
       - check-pending=CI Status
       - label!=do-not-merge
     actions:
-      queue:
-        name: merge
       merge:
         method: squash
   - name: Notify author on queue failure
