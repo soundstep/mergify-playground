@@ -1,10 +1,71 @@
+# queue_rules:
+#   - name: ci-prepare
+#     conditions: []
+#   - name: ci-merge
+#     conditions: []
+
 pull_request_rules:
+  # - name: Apply release-plan
+  #   conditions:
+  #     - base=main
+  #     - label=simulate-approvals
+  #   actions:
+  #     label:
+  #       add: ci-merge-prepare
+  - name: Prepare pull request to be merge
+    conditions:
+      - base=main
+      - draft=false
+      - -merged
+      - -closed
+      - -check-pending=CI Status
+      - label!=do-not-merge
+      - label=simulate-approvals # simulate
+    actions:
+      queue:
+        name: prepare
+      comment:
+        message: Thank you for contributing! Your pull request is now being automatically merged.
+      label:
+        add: ci-merge-prepare
   - name: Automatic merge on approval
     conditions:
-      - label=approved
+      - base=main
+      - draft=false
+      - -merged
+      - -closed
+      - check-pending=CI Status
+      - label!=do-not-merge
+    actions:
+      queue:
+        name: merge
+      merge:
+        method: squash
+  - name: Notify author on queue failure
+    conditions:
+      - 'check-failure=Queue: Embarked in merge train'
+    actions:
+      comment:
+        message: >
+          Hey @{{ author }}, this pull request failed to merge and has been
+          dequeued from the merge train.  If you believe your PR failed in
+          the merge train because of a flaky test, requeue it by commenting
+          with `@mergifyio requeue`.
+          More details can be found on the `Queue: Embarked in merge train`
+          check-run.
+  - name: warn on conflicts
+    conditions:
+      - ci-conflict
+    actions:
+      comment:
+        message: "@{{author}} this pull request is now in conflict 😩"
+      label:
+        add:
+          - ci-conflict
+  - name: remove conflict label if not needed
+    conditions:
+      - -ci-conflict
     actions:
       label:
         remove:
-          - approved
-        add:
-          - action-merge
+          - ci-conflict
