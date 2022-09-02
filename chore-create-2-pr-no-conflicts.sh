@@ -75,5 +75,6 @@ function create_pr {
 }
 
 create_pr file1.txt
+create_pr file2.txt
 
 echo -e "${GREEN}Successful${NC}"

@@ -74,8 +74,7 @@ function create_pr {
     git checkout "$CURRENT_BRANCH"
 }
 
-create_pr file.txt
-create_pr file.txt
-create_pr file.txt
+create_pr file1.txt
+create_pr file1.txt
 
 echo -e "${GREEN}Successful${NC}"
