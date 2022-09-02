@@ -92,6 +92,7 @@ jobs:
       - name: Set penging check
         run: |
           CURRENT_SHA=$(git rev-parse HEAD)
+          echo "CURRENT_SHA: $CURRENT_SHA"
           curl --location --request POST "https://api.github.com/repos/${{ github.repository }}/statuses/$CURRENT_SHA" \
             --header 'Accept: application/vnd.github.antiope-preview+json' \
             --header 'Authorization: Basic ${{ secrets.ACTION_TOKEN }}' \
