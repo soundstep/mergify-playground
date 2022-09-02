@@ -85,19 +85,23 @@ jobs:
     timeout-minutes: 3
     name: Set pending check
     steps:
-    - name: Set penging check
-      run: |
-        CURRENT_SHA=$(git rev-parse HEAD)
-        curl --location --request POST "https://api.github.com/repos/${{ github.repository }}/statuses/$CURRENT_SHA" \
-          --header 'Accept: application/vnd.github.antiope-preview+json' \
-          --header 'Authorization: Basic ${{ secrets.ACTION_TOKEN }}' \
-          --header 'Content-Type: application/json' \
-          --data-raw '{
-              "state": "pending",
-              "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-              "description": "Running...",
-              "context": "CI Status"
-          }'
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Set penging check
+        run: |
+          CURRENT_SHA=$(git rev-parse HEAD)
+          curl --location --request POST "https://api.github.com/repos/${{ github.repository }}/statuses/$CURRENT_SHA" \
+            --header 'Accept: application/vnd.github.antiope-preview+json' \
+            --header 'Authorization: Basic ${{ secrets.ACTION_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "state": "pending",
+                "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Running...",
+                "context": "CI Status"
+            }'
 
   # merge-branch:
   #   needs: apply-release-plan
