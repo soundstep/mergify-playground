@@ -1,17 +1,9 @@
-# queue_rules:
-#   - name: ci-prepare
-#     conditions: []
-#   - name: ci-merge
-#     conditions: []
-
+queue_rules:
+  - name: prepare
+    conditions: []
+  - name: merge
+    conditions: []
 pull_request_rules:
-  # - name: Apply release-plan
-  #   conditions:
-  #     - base=main
-  #     - label=simulate-approvals
-  #   actions:
-  #     label:
-  #       add: ci-merge-prepare
   - name: Prepare pull request to be merge
     conditions:
       - base=main
@@ -27,7 +19,8 @@ pull_request_rules:
       comment:
         message: Thank you for contributing! Your pull request is now being automatically merged.
       label:
-        add: ci-merge-prepare
+        add:
+          - ci-merge-prepare
   - name: Automatic merge on approval
     conditions:
       - base=main
