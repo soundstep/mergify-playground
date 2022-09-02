@@ -85,14 +85,18 @@ jobs:
     timeout-minutes: 3
     name: Set pending check
     steps:
-    - uses: LouisBrunner/checks-action@v1.1.1
-      if: always()
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        name: CI Status
-        status: in_progress
-        output: |
-          {"summary":"something"}
+    - name: Set penging check
+      run: |
+        curl --location --request POST 'https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}' \
+          --header 'Accept: application/vnd.github.antiope-preview+json' \
+          --header 'Authorization: Basic ${{ secrets.ACTION_TOKEN }}' \
+          --header 'Content-Type: application/json' \
+          --data-raw '{
+              "state": "pending",
+              "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "description": "Running...",
+              "context": "CI Status"
+          }'
 
   # merge-branch:
   #   needs: apply-release-plan
