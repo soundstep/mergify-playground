@@ -1,0 +1,11 @@
+plan:
+  fe-spa:
+    strategy: patch
+  fe-website:
+    strategy: patch
+  fe-package1:
+    strategy: patch
+  fe-package2:
+    strategy: patch
+  fe-package3:
+    strategy: patch
