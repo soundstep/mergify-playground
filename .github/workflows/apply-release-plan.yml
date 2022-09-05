@@ -26,6 +26,33 @@ jobs:
           echo "actor: ${{ github.actor }}"
           echo "pr state: ${{ github.event.pull_request.state }}"
           echo "labels: ${{ github.event.pull_request.labels }}"
+  set-pending-status:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'mergify[bot]'
+    needs: [apply-release-plan]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    name: Set pending status
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Set penging status
+        run: |
+          CURRENT_SHA=$(git rev-parse HEAD)
+          echo "CURRENT_SHA: $CURRENT_SHA"
+          curl --location --request POST "https://${{ secrets.ACTION_TOKEN }}@api.github.com/repos/${{ github.repository }}/statuses/$CURRENT_SHA" \
+            --header 'Accept: application/vnd.github.antiope-preview+json' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "state": "pending",
+                "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Running...",
+                "context": "CI Status"
+            }'
   apply-release-plan:
     if: |
       contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
@@ -75,33 +102,6 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: ${{ steps.cache-workspace.outputs.pnpm-store-key }}
-  set-pending-status:
-    if: |
-      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
-      github.event.pull_request.state == 'open' &&
-      github.actor == 'mergify[bot]'
-    needs: [apply-release-plan]
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    name: Set pending status
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-      - name: Set penging status
-        run: |
-          CURRENT_SHA=$(git rev-parse HEAD)
-          echo "CURRENT_SHA: $CURRENT_SHA"
-          curl --location --request POST "https://${{ secrets.ACTION_TOKEN }}@api.github.com/repos/${{ github.repository }}/statuses/$CURRENT_SHA" \
-            --header 'Accept: application/vnd.github.antiope-preview+json' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "state": "pending",
-                "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                "description": "Running...",
-                "context": "CI Status"
-            }'
   # merge-branch:
   #   needs: [set-pending-status]
   #   runs-on: ubuntu-latest

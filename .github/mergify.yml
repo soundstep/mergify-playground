@@ -23,7 +23,7 @@ pull_request_rules:
       - -closed
       - label!=do-not-merge
       - label=ci-queued
-      - check-success=CI Status
+      - check-pending=CI Status
     # label:
     #   remove:
     #     - ci-merge
