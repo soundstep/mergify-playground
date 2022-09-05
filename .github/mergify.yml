@@ -18,7 +18,7 @@ pull_request_rules:
         add:
           - ci-queued
       queue:
-        method: squash
+        name: default
   # - name: Automatic merge on approval
   #   conditions:
   #     - base=main
