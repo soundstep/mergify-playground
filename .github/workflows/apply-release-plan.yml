@@ -14,7 +14,7 @@ concurrency:
 jobs:
   print-info:
     if: |
-      contains(github.event.pull_request.labels.*.name, 'ci-queue') &&
+      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]'
     runs-on: ubuntu-latest
@@ -28,7 +28,7 @@ jobs:
           echo "labels: ${{ github.event.pull_request.labels }}"
   apply-release-plan:
     if: |
-      contains(github.event.pull_request.labels.*.name, 'ci-queue') &&
+      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]'
     needs: [print-info]
@@ -77,7 +77,7 @@ jobs:
           key: ${{ steps.cache-workspace.outputs.pnpm-store-key }}
   set-pending-status:
     if: |
-      contains(github.event.pull_request.labels.*.name, 'ci-queue') &&
+      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]'
     needs: [apply-release-plan]
@@ -120,7 +120,7 @@ jobs:
   #         method: squash
   set-error-status:
     if: |
-      contains(github.event.pull_request.labels.*.name, 'ci-queue') &&
+      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]' &&
       (needs.apply-release-plan.result == 'failure' || needs.merge-branch.result == 'failure')
