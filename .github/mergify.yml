@@ -5,23 +5,27 @@ pull_request_rules:
       - -draft
       - -merged
       - -closed
-      - -check-pending=CI Status
       - label!=do-not-merge
       - label=simulate-approvals # simulate
     actions:
       comment:
         message: Thank you for contributing! Your pull request is now being automatically merged.
-      label:
-        add:
-          - ci-merge-prepare
+      # label:
+      #   add:
+      #     - ci-queued
+      queue:
+        method: squash
   - name: Automatic merge on approval
     conditions:
       - base=main
       - -draft
       - -merged
       - -closed
-      - check-pending=CI Status
+      - check-success=CI Status
       - label!=do-not-merge
+    # label:
+    #   remove:
+    #     - ci-merge
     actions:
       merge:
         method: squash
