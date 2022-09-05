@@ -144,7 +144,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]' &&
-      steps.do-stuff.result == 'success'
+      needs.do-stuff.result == 'success'
     needs: [do-stuff]
     runs-on: ubuntu-latest
     timeout-minutes: 3
@@ -172,8 +172,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]' &&
-      (steps.apply-release-plan.result == 'failure' || steps.do-stuff.result == 'failure')
-    # needs: [apply-release-plan, merge-branch]
+      (needs.apply-release-plan.result == 'failure' || needs.do-stuff.result == 'failure')
     needs: [apply-release-plan, do-stuff]
     runs-on: ubuntu-latest
     timeout-minutes: 3
