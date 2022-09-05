@@ -118,14 +118,63 @@ jobs:
   #         github-token: ${{ secrets.ACTION_TOKEN }}
   #         number: ${{ github.event.number }}
   #         method: squash
+  do-stuff:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'mergify[bot]' &&
+      needs.apply-release-plan.result == 'success'
+    needs: [apply-release-plan]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    name: Do stuff
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Do stuff
+        run: |
+          echo "Build"
+          sleep 3
+          echo "Test"
+          sleep 3
+  set-success-status:
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
+      github.event.pull_request.state == 'open' &&
+      github.actor == 'mergify[bot]' &&
+      steps.do-stuff.result == 'success'
+    needs: [do-stuff]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    name: Set pending status
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Set penging status
+        run: |
+          CURRENT_SHA=$(git rev-parse HEAD)
+          echo "CURRENT_SHA: $CURRENT_SHA"
+          curl --location --request POST "https://${{ secrets.ACTION_TOKEN }}@api.github.com/repos/${{ github.repository }}/statuses/$CURRENT_SHA" \
+            --header 'Accept: application/vnd.github.antiope-preview+json' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "state": "success",
+                "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "description": "Success",
+                "context": "CI Status"
+            }'
   set-error-status:
     if: |
       contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]' &&
-      (needs.apply-release-plan.result == 'failure' || needs.merge-branch.result == 'failure')
+      (steps.apply-release-plan.result == 'failure' || steps.do-stuff.result == 'failure')
     # needs: [apply-release-plan, merge-branch]
-    needs: [apply-release-plan]
+    needs: [apply-release-plan, do-stuff]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     name: Set error status
