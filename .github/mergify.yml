@@ -10,19 +10,20 @@ pull_request_rules:
     actions:
       comment:
         message: Thank you for contributing! Your pull request is now being automatically merged.
-      # label:
-      #   add:
-      #     - ci-queued
-      queue:
-        method: squash
+      label:
+        add:
+          - ci-queued
+      # queue:
+      #   method: squash
   - name: Automatic merge on approval
     conditions:
       - base=main
       - -draft
       - -merged
       - -closed
-      - check-success=CI Status
       - label!=do-not-merge
+      - label=ci-queued
+      - check-success=CI Status
     # label:
     #   remove:
     #     - ci-merge
