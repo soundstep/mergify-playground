@@ -1,3 +1,7 @@
+# queue_rules:
+#   - name: default
+#     conditions:
+#       - check-pending=CI Status
 pull_request_rules:
   - name: Prepare pull request to be merge
     conditions:
@@ -13,23 +17,23 @@ pull_request_rules:
       label:
         add:
           - ci-queued
-      # queue:
-      #   method: squash
-  - name: Automatic merge on approval
-    conditions:
-      - base=main
-      - -draft
-      - -merged
-      - -closed
-      - label!=do-not-merge
-      - label=ci-queued
-      - check-pending=CI Status
-    # label:
-    #   remove:
-    #     - ci-merge
-    actions:
-      merge:
+      queue:
         method: squash
+  # - name: Automatic merge on approval
+  #   conditions:
+  #     - base=main
+  #     - -draft
+  #     - -merged
+  #     - -closed
+  #     - label!=do-not-merge
+  #     - label=ci-queued
+  #     - check-pending=CI Status
+  #   # label:
+  #   #   remove:
+  #   #     - ci-merge
+  #   actions:
+  #     merge:
+  #       method: squash
   - name: Notify author on queue failure
     conditions:
       - 'check-failure=Queue: Embarked in merge train'
