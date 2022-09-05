@@ -31,7 +31,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'ci-queued') &&
       github.event.pull_request.state == 'open' &&
       github.actor == 'mergify[bot]'
-    needs: [apply-release-plan]
+    needs: [print-info]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     name: Set pending status
@@ -148,7 +148,7 @@ jobs:
     needs: [do-stuff]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    name: Set pending status
+    name: Set success status
     steps:
       - uses: actions/checkout@v3
         with:
